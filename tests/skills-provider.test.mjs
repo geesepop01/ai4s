@@ -97,3 +97,22 @@ test('readSkill refuses path traversal and unknown names', async () => {
   assert.equal(skill.description, 'works fine here')
   assert.equal(isValidSkillName('../etc/passwd'), false)
 })
+
+test('a provider that answers {candidates, complete:false} still serves its skills', async () => {
+  const { ctx, captured } = fakeCtx()
+  registerSkills(ctx, {
+    dir: '/tmp/skills',
+    mode: 'curated',
+    logger: ctx.logger,
+    loadDelegate: async () => ({
+      name: 'openscience',
+      async list() {
+        return { candidates: [visible], complete: false }
+      },
+      async get() { return undefined },
+      async dispose() {},
+    }),
+  })
+  const listed = await captured.provider.list({})
+  assert.deepEqual(listed.map((c) => c.name), ['scanpy'])
+})

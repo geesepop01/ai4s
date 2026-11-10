@@ -77,3 +77,24 @@ test('RateLimiter waits at least the minimum interval between runs', async () =>
   assert.equal(waits.length, 1)
   assert.ok(waits[0] >= 100, `waited ${waits[0]}`)
 })
+
+test('getText returns non-JSON payloads such as Atom XML', async () => {
+  const client = createHttpClient({
+    web: webReturning(async () => ({ statusCode: 200, body: { kind: 'text', content: '<feed><entry/></feed>' }, truncated: false })),
+  })
+  const result = await client.getText('https://export.arxiv.org/api/query?x=1')
+  assert.equal(result.ok, true)
+  assert.match(result.text, /<feed>/)
+})
+
+test('requests to the same host are spaced by that host interval', async () => {
+  const waits = []
+  const client = createHttpClient({
+    web: webReturning(async () => ({ statusCode: 200, body: { kind: 'text', content: '{}' }, truncated: false })),
+    sleep: async (ms) => waits.push(ms),
+  })
+  await client.getJson('https://api.openalex.org/works?x=1')
+  await client.getJson('https://api.openalex.org/works?x=2')
+  assert.equal(waits.length, 1)
+  assert.ok(waits[0] >= 900, `waited ${waits[0]}ms`)
+})

@@ -18,7 +18,7 @@ plugin_manager install_bundle target "D:/路径/ai4s"
 
 DSH Desktop：**设置 → 插件 → 安装**，搜 `ai4s`，装完按提示重启或等热重载。
 
-装好后打开 **设置 → 插件 → ai4s**：填联系邮箱（Crossref/OpenAlex 礼貌池与开放获取查询用），NCBI API Key 可选。
+配置在插件行上（`mailto`、`catalogMode`、`bootstrap`、`sources`、`stateDir`）；NCBI Key 存宿主凭据库 `openscience.pubmed`。界面里的 **OpenScience** 设置页只展示当前生效值——修改请去 **插件 → ai4s**。
 
 ## 你会得到
 
@@ -30,9 +30,9 @@ DSH Desktop：**设置 → 插件 → 安装**，搜 `ai4s`，装完按提示重
 | **`science_paper`** | DOI / PMID / arXiv id / OpenAlex id → 核验过的元数据 + 开放获取结论与 PDF 链接（配了邮箱才查 Unpaywall）。 |
 | **`science_related`** | 从一篇论文向外走：参考文献、被引文献、相关文献。 |
 | **`science_cite`** | 导出 BibTeX / RIS / CSL-JSON 到工作目录，路径限制在会话目录内。 |
-| **`science_state`** | 带 revision 的研究状态（`.openscience/state.json`），和面板共用同一份。 |
+| **`science_state`** | 带 revision 的研究状态（`<会话工作区>/.openscience/state.json`），和面板共用同一份。 |
 | **`science_skill`** | 按名字或主题加载 370 个技能里的任意一个，包括目录隐藏的 300 多个。 |
-| **工作台面板** | 侧栏一个图标，打开浮层：研究状态、文献列表、可搜索的技能目录。 |
+| **工作台面板** | 侧栏一个图标，打开主面板：研究状态、文献列表、可搜索的技能目录（宿主侧 60 秒缓存）。 |
 
 ## 与「科研模式」预设的区别
 
@@ -55,12 +55,13 @@ DSH Desktop：**设置 → 插件 → 安装**，搜 `ai4s`，装完按提示重
 
 - 出网走宿主的 web provider，它只接受 URL（没有 header、没有 POST）。所以礼貌参数放在 query 上；provider 缺失或被限速时给一句可读的说明，不会崩。
 - 工具在上游失败时从不抛错：模型会拿到「限速 / 未找到 / 上游故障 / 未配置」，自己决定下一步。
-- 面板跟随**最近一次有研究动作的工作目录**；按会话选择待做。
+- 面板显示**最近一次有研究动作的工作目录**；按会话选择待做。
+- 面板的两个路由不经过宿主的 `/api` 鉴权，因此自带防护：只接受已注册工作区内的绝对路径、请求体上限 1MB、跨站（`Sec-Fetch-Site` 或 `Origin` 不匹配）请求直接拒绝。
 
 ## 开发
 
 ```sh
-node --test-isolation=none --test tests/*.test.mjs   # 64 个测试
+node --test-isolation=none --test tests/*.test.mjs   # 71 个测试
 node scripts/verify.mjs                              # 发布前检查
 node scripts/sync-skills.mjs --source <openscience>/skills   # 重新 vendor
 ```

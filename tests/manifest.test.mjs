@@ -13,7 +13,7 @@ test('manifest declares bundle, client and engine floor', async () => {
   assert.equal(pkg.dsh.client.platform, 'web')
   assert.equal(pkg.dsh.client.immediately, true)
   assert.match(pkg.engines.dsh, />=0\.2\.0/)
-  for (const f of ['index.js', 'client.js', 'cordis.patch.yml', 'LICENSE', 'NOTICE', 'icon.svg', 'locale/en.json', 'locale/zh-CN.json']) {
+  for (const f of ['index.js', 'client.js', 'cordis.patch.yml', 'LICENSE', 'NOTICE', 'icon.svg']) {
     assert.ok(existsSync(root(f)), `${f} missing`)
   }
 })

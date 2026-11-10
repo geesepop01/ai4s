@@ -25,6 +25,7 @@ import { createCiteTool } from './lib/tools/cite.js'
 import { createStateTool } from './lib/tools/state.js'
 import { createSkillTool } from './lib/tools/skill.js'
 import { registerStateRoutes } from './lib/routes.js'
+import { getLastStateDir } from './lib/last-dir.js'
 
 /** Cordis plugin name. */
 export const name = 'openscience'
@@ -66,12 +67,31 @@ export function apply(ctx, config = {}) {
     return
   }
 
+  // The tool exec context carries the initiating agent, not a cwd; resolve the
+  // session's working directory from it (the harness moved cwd ownership to
+  // `workingDirectory`).
+  const resolveCwd = (exec) => {
+    const session = exec?.agent?.session
+    const fromExec = exec?.cwd ?? session?.header?.cwd
+    if (typeof fromExec === 'string' && fromExec !== '') return fromExec
+    const directories = ctx.get?.('workingDirectory')
+    if (directories !== undefined && session !== undefined) {
+      try {
+        const path = directories.get(session)
+        if (typeof path === 'string' && path !== '') return path
+      } catch {
+        // fall through
+      }
+    }
+    return undefined
+  }
+
   const tools = [
     createSearchTool({ client, config: settings, logger, limiter, getPubmedKey: () => readPubmedKey(ctx) }),
     createPaperTool({ client, config: settings }),
     createRelatedTool({ client, config: settings }),
-    createCiteTool({ client, config: settings, logger }),
-    createStateTool({ config: settings, logger }),
+    createCiteTool({ client, config: settings, logger, resolveCwd }),
+    createStateTool({ config: settings, logger, resolveCwd }),
     createSkillTool({ dir: skillsRoot, logger }),
   ]
   for (const tool of tools) {
@@ -81,7 +101,32 @@ export function apply(ctx, config = {}) {
 
   const webServer = ctx.get?.('webServer')
   if (webServer !== undefined && typeof webServer.register === 'function') {
-    ctx.effect?.(() => registerStateRoutes({ webServer, logger }))
+    // These routes bypass the host's authenticated /api channel, so they only
+      // reach directories the harness already knows about: registered
+      // workspaces plus the last research directory this plugin touched.
+      const allowedRoots = () => {
+        const roots = []
+        const registry = ctx.get?.('workspaceRegistry')
+        if (registry !== undefined && typeof registry.list === 'function') {
+          try {
+            for (const workspace of registry.list()) {
+              if (typeof workspace?.path === 'string' && workspace.path !== '') roots.push(workspace.path)
+            }
+          } catch {
+            // registry unavailable: fall through to the last directory
+          }
+        }
+        const last = getLastStateDir()
+        if (typeof last === 'string' && last !== '') roots.push(last)
+        return roots
+      }
+      const configInfo = async () => ({
+        mailto: settings.mailto,
+        catalogMode: settings.catalogMode,
+        bootstrap: settings.bootstrap,
+        pubmedKeySet: (await readPubmedKey(ctx)) !== undefined,
+      })
+      ctx.effect?.(() => registerStateRoutes({ webServer, logger, allowedRoots, configInfo }))
   }
 }
 

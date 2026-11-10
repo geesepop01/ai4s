@@ -121,3 +121,15 @@ test('science_search truncates long abstracts', async () => {
   const out = await tool.execute({ query: 'x', detailed: true }, {})
   assert.ok(out.text.includes('…'), 'long abstract should be marked as truncated')
 })
+
+test('a truncated upstream response is disclosed, not silently returned', async () => {
+  const client = {
+    async getJson(url) {
+      if (!url.includes('api.openalex.org')) return { ok: false, status: 404, reason: 'not-found', message: 'no' }
+      return { ok: true, status: 200, body: { results: [openalex.results[0]] }, truncated: true }
+    },
+  }
+  const tool = createSearchTool({ client, config: { ...config, sources: ['openalex'] }, logger: { warn() {} } })
+  const out = await tool.execute({ query: 'x' }, {})
+  assert.match(out.text, /截断/)
+})

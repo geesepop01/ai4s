@@ -18,7 +18,7 @@ plugin_manager install_bundle target "D:/path/to/ai4s"
 
 In DSH Desktop: **Settings → Plugins → Install**, then search `ai4s`. Restart or let the profile hot-reload.
 
-After install, open **Settings → Plugins → ai4s** to set a contact email (used for Crossref/OpenAlex politeness and open-access lookups) and an optional NCBI API key.
+Configuration lives on the plugin row (`mailto`, `catalogMode`, `bootstrap`, `sources`, `stateDir`); the NCBI key goes into the host credential store under `openscience.pubmed`. The in-app **OpenScience** settings page shows the values currently in force — edit them in **Plugins → ai4s**, not there.
 
 ## What you get
 
@@ -30,9 +30,9 @@ After install, open **Settings → Plugins → ai4s** to set a contact email (us
 | **`science_paper`** | Resolve a DOI, PMID, arXiv id or OpenAlex id into verified metadata plus an open-access verdict and PDF link (Unpaywall, when an email is configured). |
 | **`science_related`** | Walk one paper's references, citations or related works. |
 | **`science_cite`** | Write BibTeX, RIS or CSL-JSON into the working directory, path-guarded to the session cwd. |
-| **`science_state`** | Revision-guarded research state (`.openscience/state.json`) shared with the panel. |
+| **`science_state`** | Revision-guarded research state (`<session workspace>/.openscience/state.json`) shared with the panel. |
 | **`science_skill`** | Load any of the 370 skills by name or topic — including the 300+ that the catalog hides. |
-| **Workbench panel** | A sidebar entry opens a floating panel with the research state, the literature list and a searchable skill catalog. |
+| **Workbench panel** | A sidebar icon opens a main panel with the research state, the literature list and a searchable skill catalog (cached 60s on the host). |
 
 ## How it differs from a research preset
 
@@ -55,12 +55,13 @@ If you also keep a research preset installed, the two coexist: the skill registr
 
 - Outbound calls use the host's web provider, which accepts a URL only — no headers, no POST. Politeness therefore rides in query parameters, and a provider that is missing or rate-limited produces a readable sentence, never a crash.
 - Tools never throw on upstream failure: the model gets "rate-limited / not-found / upstream-error / not configured" and can decide what to do next.
-- The panel follows the **last research workspace the agent touched**; a per-session picker is planned.
+- The panel shows the **last research workspace the agent touched**; a per-session picker is planned.
+- The two panel routes are unauthenticated by the host's `/api` channel, so they defend themselves: absolute paths inside a registered workspace only, 1 MB body cap, and cross-site (`Sec-Fetch-Site`, mismatched `Origin`) requests are refused.
 
 ## Development
 
 ```sh
-node --test-isolation=none --test tests/*.test.mjs   # 64 tests
+node --test-isolation=none --test tests/*.test.mjs   # 71 tests
 node scripts/verify.mjs                              # release checks
 node scripts/sync-skills.mjs --source <openscience>/skills   # re-vendor
 ```

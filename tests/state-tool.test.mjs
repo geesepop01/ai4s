@@ -37,3 +37,13 @@ test('a stale revision answers with a conflict instead of throwing', async () =>
   assert.match(out.text, /conflict/i)
   assert.match(out.text, /1/)
 })
+
+test('a write that omits expected_revision on an existing state is refused, not adopted', async () => {
+  const cwd = mkdtempSync(join(tmpdir(), 'ai4s-st-'))
+  const tool = createStateTool(deps)
+  await tool.execute({ action: 'write', payload: { question: 'a' } }, { cwd })
+  const out = await tool.execute({ action: 'write', payload: { question: 'b' } }, { cwd })
+  assert.match(out.text, /conflict/i)
+  assert.match(out.text, /expected_revision/)
+  assert.equal(JSON.parse(readFileSync(join(cwd, '.openscience', 'state.json'), 'utf8')).question, 'a')
+})

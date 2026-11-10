@@ -8,10 +8,11 @@ test('the client half registers into the panel list, the overlay and settings', 
   const source = await read('client.js')
   assert.match(source, /__ModuleLoader__\.load/)
   assert.match(source, /sidebar\.panellist/)
-  assert.match(source, /shell\.overlay/)
+  assert.match(source, /name: 'main', key: 'openscience-workbench'/)
   assert.match(source, /settings\.section/)
-  assert.match(source, /fetch\('\/ai4s\/state'\)/)
-  assert.match(source, /fetch\('\/ai4s\/catalog'\)/)
+  assert.match(source, /fetch\(url, { headers: { accept: 'application\/json' } }\)/)
+  assert.match(source, /'\/ai4s\/state'/)
+  assert.match(source, /'\/ai4s\/catalog'/)
 })
 
 test('the client reads both locales and never hardcodes one path', async () => {
@@ -20,17 +21,13 @@ test('the client reads both locales and never hardcodes one path', async () => {
   assert.match(source, /STRINGS\.en/)
 })
 
-test('locale files carry the same keys in both languages', async () => {
-  const en = flatten(JSON.parse(await read('locale/en.json')))
-  const zh = flatten(JSON.parse(await read('locale/zh-CN.json')))
-  assert.deepEqual(Object.keys(zh).sort(), Object.keys(en).sort())
+test('the client dictionary covers both languages and reads the live locale', async () => {
+  const source = await read('client.js')
+  // LocaleSnapshot exposes `active`; `id` never existed on it.
+  assert.match(source, /getLocale\?\.\(\)/)
+  assert.match(source, /snapshot\?\.active/)
+  assert.match(source, /'zh-CN':/)
+  // Tabs are nested, so a flat lookup would render raw ids.
+  assert.match(source, /tabs: { state:/)
+  assert.match(source, /t\(dict, `tabs\.\$\{id\}`\)/)
 })
-
-function flatten(value, prefix = '', out = {}) {
-  for (const [key, child] of Object.entries(value)) {
-    const path = prefix === '' ? key : `${prefix}.${key}`
-    if (child !== null && typeof child === 'object') flatten(child, path, out)
-    else out[path] = child
-  }
-  return out
-}

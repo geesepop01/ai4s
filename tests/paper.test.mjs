@@ -21,6 +21,13 @@ const arxivXml = `<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"
 function clientOf(routes, calls = []) {
   return {
     calls,
+    async getText(url) {
+      calls.push(url)
+      for (const [needle, body] of routes) {
+        if (url.includes(needle) && typeof body === 'string') return { ok: true, status: 200, text: body, truncated: false }
+      }
+      return { ok: false, status: 404, reason: 'not-found', message: '没有找到记录' }
+    },
     async getJson(url) {
       calls.push(url)
       for (const [needle, body] of routes) {
