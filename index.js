@@ -24,6 +24,7 @@ import { createRelatedTool } from './lib/tools/related.js'
 import { createCiteTool } from './lib/tools/cite.js'
 import { createStateTool } from './lib/tools/state.js'
 import { createSkillTool } from './lib/tools/skill.js'
+import { registerStateRoutes } from './lib/routes.js'
 
 /** Cordis plugin name. */
 export const name = 'openscience'
@@ -69,6 +70,11 @@ export function apply(ctx, config = {}) {
   for (const tool of tools) {
     const dispose = ctx.tools.register(tool)
     if (typeof dispose === 'function') ctx.effect?.(() => dispose)
+  }
+
+  const webServer = ctx.get?.('webServer')
+  if (webServer !== undefined && typeof webServer.register === 'function') {
+    ctx.effect?.(() => registerStateRoutes({ webServer, logger }))
   }
 }
 
