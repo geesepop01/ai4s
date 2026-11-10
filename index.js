@@ -30,6 +30,13 @@ import { registerStateRoutes } from './lib/routes.js'
 export const name = 'openscience'
 
 /**
+ * Services Cordis must inject before `apply` runs: `ctx.<service>` access is
+ * refused for anything not declared here. `web`, `webServer` and `credentials`
+ * stay optional (read through `ctx.get`) so a minimal host still mounts.
+ */
+export const inject = ['skills', 'systemPrompt', 'tools']
+
+/**
  * Mount the plugin.
  *
  * @param {import('@deepseek-ai/cordis').Context} ctx

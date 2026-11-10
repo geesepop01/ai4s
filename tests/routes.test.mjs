@@ -4,7 +4,8 @@ import { mkdtempSync, existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { registerStateRoutes } from '../lib/routes.js'
+import { CATALOG_ROUTE, STATE_ROUTE, registerStateRoutes } from '../lib/routes.js'
+import { setLastStateDir } from '../lib/last-dir.js'
 
 function harness() {
   const routes = []
@@ -13,57 +14,93 @@ function harness() {
   return { routes, dispose }
 }
 
-function request(url, init = {}) {
-  return { url, method: init.method ?? 'GET', async json() { return init.body } }
+function request(url, { method = 'GET', body } = {}) {
+  const chunks = body === undefined ? [] : [Buffer.from(JSON.stringify(body))]
+  return {
+    method,
+    url,
+    async *[Symbol.asyncIterator]() {
+      for (const chunk of chunks) yield chunk
+    },
+  }
 }
 
-test('GET on a fresh workspace answers revision 0 and an empty state', async () => {
+function response() {
+  return {
+    statusCode: 0,
+    headers: {},
+    body: '',
+    writeHead(status, headers) {
+      this.statusCode = status
+      this.headers = headers ?? {}
+    },
+    setHeader() {},
+    end(text) {
+      this.body = text ?? ''
+    },
+  }
+}
+
+async function call(route, req) {
+  const res = response()
+  await route.handler(req, res)
+  return { status: res.statusCode, json: res.body === '' ? undefined : JSON.parse(res.body) }
+}
+
+test('routes register one exact handler per path', () => {
   const { routes } = harness()
-  const route = routes.find((r) => r.method === 'GET')
-  const cwd = mkdtempSync(join(tmpdir(), 'ai4s-rt-'))
-  const response = await route.handler(request(`http://localhost/ai4s/state?path=${encodeURIComponent(cwd)}`))
-  assert.equal(response.status, 200)
-  const body = await response.json()
-  assert.equal(body.revision, 0)
-  assert.equal(body.state.schemaVersion, 1)
+  assert.deepEqual(routes.map((route) => `${route.kind}:${route.path}`), [`exact:${STATE_ROUTE}`, `exact:${CATALOG_ROUTE}`])
 })
 
-test('POST writes the state and returns the new revision', async () => {
-  const { routes } = harness()
-  const route = routes.find((r) => r.method === 'POST')
+test('GET without a path falls back to the last research workspace', async () => {
   const cwd = mkdtempSync(join(tmpdir(), 'ai4s-rt-'))
-  const response = await route.handler(request('http://localhost/ai4s/state', {
+  setLastStateDir(cwd)
+  const { routes } = harness()
+  const result = await call(routes[0], request('/ai4s/state'))
+  assert.equal(result.status, 200)
+  assert.equal(result.json.revision, 0)
+  assert.equal(result.json.path, cwd)
+})
+
+test('GET with an explicit path answers that workspace', async () => {
+  const { routes } = harness()
+  const cwd = mkdtempSync(join(tmpdir(), 'ai4s-rt-'))
+  const result = await call(routes[0], request(`/ai4s/state?path=${encodeURIComponent(cwd)}`))
+  assert.equal(result.status, 200)
+  assert.equal(result.json.state.schemaVersion, 1)
+})
+
+test('POST writes the state and a stale POST answers 409', async () => {
+  const { routes } = harness()
+  const cwd = mkdtempSync(join(tmpdir(), 'ai4s-rt-'))
+  const post = (expectedRevision) => call(routes[0], request(STATE_ROUTE, {
     method: 'POST',
-    body: { path: cwd, state: { schemaVersion: 1, stage: 'COMPUTE', entries: [], todos: [] }, expectedRevision: null },
+    body: { path: cwd, state: { schemaVersion: 1, stage: 'COMPUTE', entries: [], todos: [] }, expectedRevision },
   }))
-  assert.equal(response.status, 200)
-  const body = await response.json()
-  assert.equal(body.revision, 1)
+  const first = await post(null)
+  assert.equal(first.status, 200)
+  assert.equal(first.json.revision, 1)
   assert.ok(existsSync(join(cwd, 'state.json')))
-})
-
-test('a stale POST answers 409 with the current revision', async () => {
-  const { routes } = harness()
-  const route = routes.find((r) => r.method === 'POST')
-  const cwd = mkdtempSync(join(tmpdir(), 'ai4s-rt-'))
-  const post = (expectedRevision) => route.handler(request('http://localhost/ai4s/state', {
-    method: 'POST',
-    body: { path: cwd, state: { schemaVersion: 1, stage: 'SCOPE' }, expectedRevision },
-  }))
-  await post(null)
-  const response = await post(null)
-  assert.equal(response.status, 409)
-  assert.equal((await response.json()).revision, 1)
+  const second = await post(null)
+  assert.equal(second.status, 409)
+  assert.equal(second.json.revision, 1)
 })
 
 test('a bad path or an unknown method is refused without touching disk', async () => {
+  setLastStateDir(undefined)
   const { routes } = harness()
-  const get = routes.find((r) => r.method === 'GET')
-  const missing = await get.handler(request('http://localhost/ai4s/state'))
+  const missing = await call(routes[0], request(STATE_ROUTE))
   assert.equal(missing.status, 400)
-  const notADir = await get.handler(request('http://localhost/ai4s/state?path=' + encodeURIComponent('C:/definitely/not/here')))
+  const notADir = await call(routes[0], request(`${STATE_ROUTE}?path=${encodeURIComponent('C:/definitely/not/here')}`))
   assert.equal(notADir.status, 400)
-  const post = routes.find((r) => r.method === 'POST')
-  const wrong = await post.handler(request('http://localhost/ai4s/state', { method: 'PUT', body: {} }))
+  const wrong = await call(routes[0], request(STATE_ROUTE, { method: 'PUT' }))
   assert.equal(wrong.status, 405)
+})
+
+test('the catalog route lists the vendored skills', async () => {
+  const { routes } = harness()
+  const result = await call(routes[1], request(CATALOG_ROUTE))
+  assert.equal(result.status, 200)
+  assert.equal(result.json.length, 370)
+  assert.ok(result.json.every((item) => typeof item.hidden === 'boolean'))
 })
