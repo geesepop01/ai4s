@@ -3,3 +3,15 @@ node_modules/
 *.tgz
 .openscience/
 *.diff
+
+# secrets ¡ª never commit (added 2026-11-10)
+.env
+.env.local
+.env.*.local
+.npmrc
+*.pem
+*.key
+*.p12
+id_rsa*
+*.token
+credentials.json
