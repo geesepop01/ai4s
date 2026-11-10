@@ -380,7 +380,7 @@ mount 一个私有实例，`rank: 600`、`name: 'openscience'`、目录指向 `d
 - Test: `tests/routes.test.mjs`
 
 **Interfaces:**
-- Produces: `registerStateRoutes({ webServer, logger }): () => void`，路径 `GET /dsh-openscience/state?path=<abs>`、`POST /dsh-openscience/state`（body `{ path, state, expectedRevision }`）。
+- Produces: `registerStateRoutes({ webServer, logger }): () => void`，路径 `GET /ai4s/state?path=<abs>`、`POST /ai4s/state`（body `{ path, state, expectedRevision }`）。
 
 - [ ] **Step 1: 写失败测试** — 直接调用 handler：GET 不存在 → `{ revision: 0, state: empty }`；POST 正常写入返回新 revision；POST 冲突返回 409；`path` 缺失或不是目录 → 400；非 GET/POST → 405。
 - [ ] **Step 2: 运行确认失败**
@@ -415,7 +415,7 @@ mount 一个私有实例，`rank: 600`、`name: 'openscience'`、目录指向 `d
 - Test: `tests/client-state-view.test.mjs`
 
 **Interfaces:**
-- Consumes: `GET /dsh-openscience/state?path=`
+- Consumes: `GET /ai4s/state?path=`
 - Produces: `StateView({ path, api })` 组件；`fetchState(path): Promise<{revision, state}>`。
 
 - [ ] **Step 1: 写失败测试** — 组件源码包含三处状态分支（无会话 / 无状态 / 有状态）与阶段进度渲染；`fetchState` 对 500 与网络错误返回 `{ error: 'unavailable' }` 而不是抛。
@@ -452,7 +452,7 @@ mount 一个私有实例，`rank: 600`、`name: 'openscience'`、目录指向 `d
 - Test: `tests/catalog.test.mjs`
 
 **Interfaces:**
-- Produces: `GET /dsh-openscience/catalog`（返回 `[{name, description, category, visible}]`）；`CatalogView({ items })`；`searchCatalog(items, q)`。
+- Produces: `GET /ai4s/catalog`（返回 `[{name, description, category, visible}]`）；`CatalogView({ items })`；`searchCatalog(items, q)`。
 
 - [ ] **Step 1: 写失败测试** — 路由返回 371 条且 `visible` 标记与 curated 一致；`searchCatalog('scanpy')` 命中；`searchCatalog('zzz')` 为空数组。
 - [ ] **Step 2: 运行确认失败**

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="OpenScience research workbench">
+  <rect width="64" height="64" rx="14" fill="#2f6f4e"/>
+  <path d="M26 14h12v3h-2v9.6l9.1 17.2A5 5 0 0 1 40.6 51H23.4a5 5 0 0 1-4.5-7.2L28 26.6V17h-2z" fill="#eaf3ee"/>
+  <path d="M24.4 36h15.2l4.2 8H20.2z" fill="#8fc7a8"/>
+  <circle cx="31" cy="40" r="2.2" fill="#2f6f4e"/>
+  <circle cx="36.5" cy="44" r="1.6" fill="#2f6f4e"/>
+</svg>

@@ -1,0 +1,66 @@
+{
+  "name": "@geesepop01/ai4s",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "OpenScience for DeepSeek Harness: 371 research skills, literature tools and a research workbench available in every session.",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./locale/en.json": "./locale/en.json",
+    "./locale/zh-CN.json": "./locale/zh-CN.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "lib",
+    "skills",
+    "locale",
+    "upstream",
+    "icon.svg",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh-CN.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "openscience",
+    "research",
+    "skills",
+    "literature",
+    "scientific"
+  ],
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=24",
+    "dsh": ">=0.2.0-0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "^0.2.0-0",
+    "@deepseek-ai/dsh-skill-filesystem": "^0.2.0-0"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-skill-filesystem": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "test": "node --test-isolation=none --test tests/",
+    "verify": "node scripts/verify.mjs"
+  }
+}

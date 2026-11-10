@@ -1,0 +1,26 @@
+# Cordis bundle patch for the @geesepop01/ai4s plugin.
+#
+# Installed by dsh's own plugin manager (`plugin_manager` / `dsh plugin add`).
+# The row mounts ./index.js, which registers, at the HOST layer:
+#   1. the vendored `skills/` tree through dsh's own skill-filesystem provider
+#      (private instance, rank 600, provider name `openscience`);
+#   2. the `openscience:bootstrap` system-prompt section (research loop + routing);
+#   3. six tools: science_search / science_paper / science_related /
+#      science_cite / science_state / science_skill.
+# Because these registrations live in the global layer, every session gets them —
+# including sessions that never select an agent preset.
+
+- insert:
+    - id: openscience
+      name: './index.js'
+      config:
+        # Politeness address for Crossref/OpenAlex/Unpaywall. Empty disables
+        # the Unpaywall lookup and leaves the others on their public pool.
+        mailto: ''
+        # curated = ~60 skills carry full descriptions, the rest load by name
+        # through science_skill. all = every skill is model-invocable.
+        catalogMode: curated
+        # Always-on research-loop section (~400 tokens per request).
+        bootstrap: true
+        # Research state directory, relative to each session's working directory.
+        stateDir: .openscience
