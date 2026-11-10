@@ -111,7 +111,8 @@ window.__ModuleLoader__.load({
       }
     }
 
-    function WorkbenchButton(ctx) {
+    function WorkbenchButton(props) {
+      const ctx = props.host
       const state = useStore()
       return h('button', {
         type: 'button',
@@ -122,7 +123,8 @@ window.__ModuleLoader__.load({
       }, h('span', { 'aria-hidden': true }, '⚗'), h('span', null, t(ctx, 'title')))
     }
 
-    function Overlay(ctx) {
+    function Overlay(props) {
+      const ctx = props.host
       const state = useStore()
       const [data, setData] = React.useState({ loading: true })
       const [catalog, setCatalog] = React.useState([])
@@ -208,7 +210,8 @@ window.__ModuleLoader__.load({
           h('span', { style: { opacity: .6 } }, item.hidden ? t(ctx, 'hidden') : t(ctx, 'visible'))))))
     }
 
-    function SettingsSection(ctx) {
+    function SettingsSection(props) {
+      const ctx = props.host
       const [saved, setSaved] = React.useState(false)
       return h('section', { style: { display: 'grid', gap: 10, padding: 8 } },
         h('h3', null, t(ctx, 'settingsTitle')),
@@ -232,15 +235,15 @@ window.__ModuleLoader__.load({
       apply(ctx) {
         ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
           name: 'sidebar.panellist', id: 'openscience-workbench', order: 40,
-        }, () => h(WorkbenchButton, { ...ctx, key: 'btn' })))
+        }, () => h(WorkbenchButton, { host: ctx, key: 'btn' })))
 
         ctx.slots.inject('shell.overlay', () => ctx.slots.register({
           name: 'shell.overlay', id: 'openscience-overlay', order: 40,
-        }, () => h(Overlay, { ...ctx, key: 'overlay' })))
+        }, () => h(Overlay, { host: ctx, key: 'overlay' })))
 
         ctx.slots.inject('settings.section', () => ctx.slots.register({
           name: 'settings.section', id: 'openscience', order: 60, label: 'OpenScience',
-        }, () => h(SettingsSection, { ...ctx, key: 'settings' })))
+        }, () => h(SettingsSection, { host: ctx, key: 'settings' })))
       },
     }
   },
