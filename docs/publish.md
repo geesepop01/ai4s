@@ -13,7 +13,7 @@ npm whoami                             # 没登录就 npm login
 npm view @geesepop/ai4s version      # 报 404 = 名字可用；已存在就得换名（见第 3 步兜底）
 ```
 
-`npm whoami` 必须回 `geesepop01`——包名是 `@geesepop/ai4s`，scope 必须是你的 npm 账号或组织。
+`npm whoami` 必须回 `geesepop`——包名是 `@geesepop/ai4s`，scope 必须是你的 npm 账号或组织。
 
 ---
 
