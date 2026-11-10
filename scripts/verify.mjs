@@ -20,7 +20,7 @@ async function check(name, fn) {
 
 await check('manifest', () => {
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
-  if (pkg.name !== '@geesepop01/ai4s') throw new Error(`name is ${pkg.name}`)
+  if (pkg.name !== '@geesepop/ai4s') throw new Error(`name is ${pkg.name}`)
   if (pkg.dsh?.bundle?.patch !== './cordis.patch.yml') throw new Error('bundle patch missing')
   if (pkg.dsh?.client?.platform !== 'web') throw new Error('client platform missing')
   if (!/>=0\.2\.0/.test(pkg.engines?.dsh ?? '')) throw new Error('engines.dsh missing')

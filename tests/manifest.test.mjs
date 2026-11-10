@@ -7,7 +7,7 @@ const root = (p) => new URL(`../${p}`, import.meta.url)
 
 test('manifest declares bundle, client and engine floor', async () => {
   const pkg = JSON.parse(await readFile(root('package.json'), 'utf8'))
-  assert.equal(pkg.name, '@geesepop01/ai4s')
+  assert.equal(pkg.name, '@geesepop/ai4s')
   assert.equal(pkg.type, 'module')
   assert.equal(pkg.dsh.bundle.patch, './cordis.patch.yml')
   assert.equal(pkg.dsh.client.platform, 'web')

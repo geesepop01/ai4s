@@ -10,10 +10,10 @@
 ```powershell
 gh --version; gh auth status          # 没装就 winget install GitHub.cli，然后 gh auth login
 npm whoami                             # 没登录就 npm login
-npm view @geesepop01/ai4s version      # 报 404 = 名字可用；已存在就得换名（见第 3 步兜底）
+npm view @geesepop/ai4s version      # 报 404 = 名字可用；已存在就得换名（见第 3 步兜底）
 ```
 
-`npm whoami` 必须回 `geesepop01`——包名是 `@geesepop01/ai4s`，scope 必须是你的 npm 账号或组织。
+`npm whoami` 必须回 `geesepop01`——包名是 `@geesepop/ai4s`，scope 必须是你的 npm 账号或组织。
 
 ---
 
@@ -38,23 +38,23 @@ cd "D:\Programs\DSH Desktop\dsh-openscience"
 node scripts/verify.mjs          # 必须 5/5 PASS
 npm pack --dry-run               # 必须 5.0 MB 左右，含 index.js / client.js / lib / skills
 npm publish --access public
-npm view @geesepop01/ai4s version
+npm view @geesepop/ai4s version
 ```
 
 装一遍验证（这一步等价于用户装）：
 
 ```powershell
-dsh plugin --profile desktop add @geesepop01/ai4s
+dsh plugin --profile desktop add @geesepop/ai4s
 # 打开 DSH，侧栏应出现 AI4S 图标；设置 → 插件里应有 OpenScience 页
 ```
 
 ## 3. 名字被占时的兜底
 
-`npm view` 不是 404 说明 `@geesepop01/ai4s` 已被占用（或是你自己的旧包）。改一处即可：
+`npm view` 不是 404 说明 `@geesepop/ai4s` 已被占用（或是你自己的旧包）。改一处即可：
 
 ```powershell
-# package.json 的 name 改成 @geesepop01/dsh-openscience，然后
-git commit -am "chore: rename package to @geesepop01/dsh-openscience"
+# package.json 的 name 改成 @geesepop/dsh-openscience，然后
+git commit -am "chore: rename package to @geesepop/dsh-openscience"
 npm publish --access public
 ```
 
@@ -64,9 +64,9 @@ npm publish --access public
 
 ```powershell
 cd "D:\Programs\DSH Desktop\dsh-openscience"
-npm pack                          # 生成 geesepop01-ai4s-1.0.0.tgz
+npm pack                          # 生成 geesepop-ai4s-1.0.0.tgz
 git tag -a v1.0.0 -m "v1.0.0" && git push --tags
-gh release create v1.0.0 geesepop01-ai4s-1.0.0.tgz --title "v1.0.0" --generate-notes
+gh release create v1.0.0 geesepop-ai4s-1.0.0.tgz --title "v1.0.0" --generate-notes
 ```
 
 ## 5. 上架 awesome-dsh-plugin（市场只认这个列表）
@@ -77,7 +77,7 @@ gh release create v1.0.0 geesepop01-ai4s-1.0.0.tgz --title "v1.0.0" --generate-n
 1. 打开 <https://github.com/awesome-dsh-plugin/awesome-dsh-plugin>
 2. 找 `tools`（Tools & Capabilities）分区，点铅笔编辑
 3. 加一行（正文见 `docs/awesome-pr.md`）
-4. Propose changes → 写标题 `Add @geesepop01/ai4s` → Create pull request
+4. Propose changes → 写标题 `Add @geesepop/ai4s` → Create pull request
 
 **B. gh CLI**
 
@@ -86,9 +86,9 @@ gh repo fork awesome-dsh-plugin/awesome-dsh-plugin --clone
 cd awesome-dsh-plugin
 # 编辑 README，在 tools 分区加那一行
 git checkout -b add-ai4s
-git commit -am "Add @geesepop01/ai4s"
+git commit -am "Add @geesepop/ai4s"
 git push -u origin add-ai4s
-gh pr create --title "Add @geesepop01/ai4s" --body-file "D:\Programs\DSH Desktop\dsh-openscience\docs\awesome-pr.md"
+gh pr create --title "Add @geesepop/ai4s" --body-file "D:\Programs\DSH Desktop\dsh-openscience\docs\awesome-pr.md"
 ```
 
 CI 每天刷新 `plugins.json`，市场与 dshmarket.com、dshmarket 应用通常一天内出现。
@@ -109,7 +109,7 @@ CI 每天刷新 `plugins.json`，市场与 dshmarket.com、dshmarket 应用通�
 ## 完成后应该能验证到
 
 - [ ] `git ls-remote origin` 有 `v1.0.0` 与 `main`
-- [ ] `npm view @geesepop01/ai4s version` 返回 1.0.0
-- [ ] `dsh plugin --profile desktop add @geesepop01/ai4s` 能装、能卸
+- [ ] `npm view @geesepop/ai4s version` 返回 1.0.0
+- [ ] `dsh plugin --profile desktop add @geesepop/ai4s` 能装、能卸
 - [ ] awesome-dsh-plugin 的 PR 有编号；一天后 `https://awesome-dsh-plugin.com/plugins.json` 里能搜到 `ai4s`
 - [ ] 全新会话（不选任何预设）问一句「查 2013 年纳米温度计的文献」，模型会调 `science_search`

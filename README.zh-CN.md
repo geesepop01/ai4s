@@ -1,4 +1,4 @@
-# OpenScience 科研插件（`@geesepop01/ai4s`）
+# OpenScience 科研插件（`@geesepop/ai4s`）
 
 [English](./README.md) | 中文
 
@@ -10,7 +10,7 @@
 
 ```sh
 # npm
-dsh plugin --profile <profile> add @geesepop01/ai4s
+dsh plugin --profile <profile> add @geesepop/ai4s
 
 # 或从本机目录装
 plugin_manager install_bundle target "D:/路径/ai4s"

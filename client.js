@@ -5,7 +5,7 @@
 // build step: the host injects React and the slot registry.
 
 window.__ModuleLoader__.load({
-  id: '@geesepop01/ai4s',
+  id: '@geesepop/ai4s',
   factory(require) {
     const React = require('react')
     const h = React.createElement

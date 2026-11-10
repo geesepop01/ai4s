@@ -1,4 +1,4 @@
-# Cordis bundle patch for the @geesepop01/ai4s plugin.
+# Cordis bundle patch for the @geesepop/ai4s plugin.
 #
 # Installed by dsh's own plugin manager (`plugin_manager` / `dsh plugin add`).
 # The row mounts ./index.js, which registers, at the HOST layer:

@@ -1,4 +1,4 @@
-# OpenScience for DeepSeek Harness (`@geesepop01/ai4s`)
+# OpenScience for DeepSeek Harness (`@geesepop/ai4s`)
 
 English | [中文](./README.zh-CN.md)
 
@@ -10,7 +10,7 @@ Vendored from [synthetic-sciences/OpenScience](https://github.com/synthetic-scie
 
 ```sh
 # npm
-dsh plugin --profile <profile> add @geesepop01/ai4s
+dsh plugin --profile <profile> add @geesepop/ai4s
 
 # or from the local checkout
 plugin_manager install_bundle target "D:/path/to/ai4s"
