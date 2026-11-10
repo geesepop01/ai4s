@@ -53,7 +53,7 @@ test('without a mailto the open-access lookup is skipped, not faked', async () =
   const tool = createPaperTool({ client: clientOf([['api.openalex.org', openalexWork]], calls), config: { mailto: '' } })
   const out = await tool.execute({ id: '10.1038/nature12373' }, {})
   assert.equal(calls.some((url) => url.includes('unpaywall')), false)
-  assert.match(out.text, /open access: unknown|oa_status: hybrid/)
+  assert.match(out.text, /open access: (unknown|hybrid)/)
 })
 
 test('a PMID resolves through the pmid route', async () => {
