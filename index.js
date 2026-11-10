@@ -10,11 +10,12 @@
 // Everything is registered through public Services, imported lazily, and
 // degrades with a diagnostic instead of a bare module-resolution crash.
 
+import { skillsRoot } from './lib/paths.js'
+import { registerSkills } from './lib/skills.js'
+import { BOOTSTRAP_ORDER, BOOTSTRAP_SECTION, bootstrapText } from './lib/bootstrap.js'
+
 /** Cordis plugin name. */
 export const name = 'openscience'
-
-/** Host services this plugin registers against; all optional at mount time. */
-export const inject = []
 
 /**
  * Mount the plugin.
@@ -23,8 +24,19 @@ export const inject = []
  * @param {object} config raw row config (see cordis.patch.yml)
  */
 export function apply(ctx, config = {}) {
-  // Filled in by Task 3 (skills), Task 4 (bootstrap), Task 13 (tools),
-  // Task 14 (routes).
-  void ctx
-  void config
+  const logger = ctx.logger ?? console
+  const settings = {
+    catalogMode: config.catalogMode === 'all' ? 'all' : 'curated',
+    bootstrap: config.bootstrap !== false,
+  }
+
+  ctx.effect?.(() => registerSkills(ctx, { dir: skillsRoot, mode: settings.catalogMode, logger }))
+
+  if (settings.bootstrap && typeof ctx.systemPrompt?.section === 'function') {
+    ctx.systemPrompt.section({
+      name: BOOTSTRAP_SECTION,
+      order: BOOTSTRAP_ORDER,
+      text: bootstrapText(settings),
+    })
+  }
 }
